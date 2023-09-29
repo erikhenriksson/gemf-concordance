@@ -52,7 +52,7 @@ html = """
 
 
     <meta charset="utf-8" />
-    <title>qa-annotator</title>
+    <title>GEMF Concordance</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="app.js"></script>
   </head>
