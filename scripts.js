@@ -1,3 +1,39 @@
+const transliteration = {
+  w: "ς",
+  e: "ε",
+  r: "ρ",
+  t: "τ",
+  y: "υ",
+  u: "θ",
+  i: "ι",
+  o: "ο",
+  p: "π",
+  a: "α",
+  s: "σ",
+  d: "δ",
+  f: "φ",
+  g: "γ",
+  h: "η",
+  j: "ξ",
+  k: "κ",
+  l: "λ",
+  z: "ζ",
+  x: "χ",
+  c: "ψ",
+  v: "ω",
+  b: "β",
+  n: "ν",
+  m: "μ",
+};
+
+const transliterate = (string) => {
+  var result = "";
+  for (chr of string) {
+    result += transliteration[chr] || chr;
+  }
+  return result;
+};
+
 const debounce = (func, wait = 300) => {
   let timeout;
 
@@ -35,5 +71,6 @@ const search = (e) => {
 };
 
 document.querySelector("#filter").addEventListener("keyup", (e) => {
+  e.target.value = transliterate(e.target.value);
   debounce(search)(e);
 });
