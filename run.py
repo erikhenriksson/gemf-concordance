@@ -1,41 +1,113 @@
 import re
 import unicodedata
 
+grave_to_acute = lambda x: unicodedata.normalize(
+    "NFC",
+    unicodedata.normalize("NFD", x or "").translate(
+        {ord("\N{COMBINING GRAVE ACCENT}"): ord("\N{COMBINING ACUTE ACCENT}")}
+    ),
+)
+
 with open("GEMF.txt") as f:
     data = f.read()
 
 filename = ""
 
 cc = {}
+total = 0
 
 for doc in re.split(r"(\[G.*)", data):
     if doc.startswith("[G"):
         docname = doc[1:-1]
 
     else:
-        doc = unicodedata.normalize("NFD", doc).lower()
+        doc = grave_to_acute(doc)
+        doc = doc.replace("̶", "_")
+        # doc = doc.replace("̧", "_")
+        doc = unicodedata.normalize("NFD", doc)
+        doc = list(doc)
+        for i, k in enumerate(doc):
+            # print(k)
+            # print(ord(k))
+            if k.isupper():
+                doc[i] = " " + k  # add space before caps
 
-        doc = "".join(x for x in doc if re.findall("([α-ωΑ-Ω]|[ϲ \]\[ ̣]|\s)+", x))
+            if ord(k) == 837:
+                doc[i] = "ι"
+            elif ord(k) == 807:
+                doc[i] = "_"
+            elif ord(k) == 776:
+                doc[i] = ""
+        doc = "".join(doc).lower()
+
+        filt_doc = ""
+        for d in doc:
+            if (
+                d.isspace()
+                or unicodedata.combining(d)
+                or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ_][ ̣"
+            ):
+                filt_doc += d
+
+        doc = filt_doc
+
         doc = re.sub(r"\s+", " ", doc)
         doc = doc.replace("ϲ", "σ")
-        for word in doc.split():
-            if re.search("([α-ωΑ-Ω]|[ϲ])+", word):
-                token = word
-                index_word = re.sub("[^α-ωΑ-Ωϲ]", "", word)
+        doc = doc.replace("[]", "_")
+        doc = doc.replace("[", "").replace("]", "")
 
-                if len(index_word) > 3:
+        print(doc)
+        for word in doc.split():
+            res_word = ""
+            for s in word:
+                if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ":
+                    res_word += s
+            if res_word:
+                word = re.sub(r"\_{1,}", r"_", word)
+
+                # if re.search("([α-ωΑ-Ω]|[ϲ])+", word):
+                token = word
+                index_word = ""
+                for d in word:
+                    if (
+                        d.isspace()
+                        or unicodedata.combining(d)
+                        or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ_"
+                    ):
+                        if d not in " ̣ ̅":
+                            index_word += d
+
+                index_word = re.sub(r"\_{1,}", r"_", index_word)
+                """
+                index_word = re.sub(
+                    "[^ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ\_]",
+                    "",
+                    word,
+                )
+                """
+
+                token = re.sub("σ$", "ς", token)
+                index_word = re.sub("σ$", "ς", index_word)
+
+                token = unicodedata.normalize("NFC", token)
+                index_word = unicodedata.normalize("NFC", index_word)
+
+                if len(index_word.replace("_", "")) > 2:
                     if index_word in cc:
                         if docname in cc[index_word]:
                             cc[index_word][docname]["occurrences"] += 1
+                            total += 1
                             cc[index_word][docname]["forms"].add(token)
 
                         else:
                             cc[index_word][docname] = {"occurrences": 1, "forms": set()}
+                            total += 1
                             cc[index_word][docname]["forms"].add(token)
 
                     else:
                         cc[index_word] = {}
                         cc[index_word][docname] = {"occurrences": 1, "forms": set()}
+                        total += 1
                         cc[index_word][docname]["forms"].add(token)
 
 
@@ -43,7 +115,7 @@ myKeys = list(cc.keys())
 myKeys.sort()
 sorted_cc = {i: cc[i] for i in myKeys}
 
-html = """
+html = f"""
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -59,6 +131,7 @@ html = """
   <body>
   <h1>GEMF Concordance</h1>
   <input id="filter" type="text" placeholder="Search"></input>
+  <h5 id="total"><span>{total}</span> tokens</h5>
   """
 alphakey = ""
 
@@ -79,7 +152,12 @@ for key, val in sorted_cc.items():
             forms.add(f)
     """
     # html += f"<h2>{key} ({num}) <span class='forms'>{', '.join(forms)}</span></h2>\n"
-    html += f"<div data-val='{key}'>"
+    plain_key = ""
+
+    for s in unicodedata.normalize("NFD", key):
+        if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς":
+            plain_key += s
+    html += f"<div data-val='{plain_key}'>"
     html += f"<h2>{key} <span class='num'>{num}</span></h2>\n"
 
     myKeys = list(val.keys())
@@ -91,29 +169,12 @@ for key, val in sorted_cc.items():
         html += f"<h3>{doc}: <span class='forms-2'>{forms}</span></h3>\n"
     html += f"</div>"
 
-html += """
+html += f"""
   </body>
-    <script>
-    document.querySelector('#filter').addEventListener('keyup', (e) => {
-        let value = e.target.value;
-        console.log(value);
-     
-        if (!value) {
-            document.querySelectorAll('div').forEach((e) => {
-                e.classList.remove('hidden');
-            })
-            return;
-        } 
-
-        document.querySelectorAll('div').forEach((e) => {
-            if (e.dataset.val.includes(value)) {
-                e.classList.remove('hidden');
-            } else {
-                e.classList.add('hidden')
-            }
-        });
-    });
+  <script>
+    window.total = {total}
   </script>
+  <script src="scripts.js"></script>
 </html>
 """
 with open("index.html", "w") as f:

@@ -54,3 +54,10 @@ h3 {
   margin-left: 100px;
   color: maroon;
 }
+
+h5 {
+  text-align: center;
+  color: darkslategrey;
+  font-weight: 400;
+  font-size: 13px;
+}
