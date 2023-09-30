@@ -111,8 +111,18 @@ for doc in re.split(r"(\[G.*)", data):
                         cc[index_word][docname]["forms"].add(token)
 
 
+def plain_underscore(x):
+    plain_s = ""
+
+    for s in unicodedata.normalize("NFD", x):
+        if s in "_ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς":
+            plain_s += s
+
+    return plain_s
+
+
 myKeys = list(cc.keys())
-myKeys.sort()
+myKeys.sort(key=lambda x: plain_underscore(x))
 sorted_cc = {i: cc[i] for i in myKeys}
 
 html = f"""
@@ -161,7 +171,7 @@ for key, val in sorted_cc.items():
     html += f"<h2>{key} <span class='num'>{num}</span></h2>\n"
 
     myKeys = list(val.keys())
-    myKeys.sort()
+    myKeys.sort(key=lambda x: plain_underscore(x))
     sorted_val = {i: val[i] for i in myKeys}
 
     for doc, docval in sorted_val.items():
