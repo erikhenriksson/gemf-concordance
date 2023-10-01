@@ -9,6 +9,24 @@ body {
   margin: 20px auto;
 }
 
+#sort {
+  margin: -14px 0 30px;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+}
+
+#sort a {
+  text-decoration: none;
+  color: grey;
+  margin-right: 5px;
+}
+
+#sort a.active {
+  font-weight: 500;
+  color: black;
+}
+
 #filter {
   display: block;
   margin: 20px auto;

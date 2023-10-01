@@ -97,18 +97,18 @@ for doc in re.split(r"(\[G.*)", data):
                         if docname in cc[index_word]:
                             cc[index_word][docname]["occurrences"] += 1
                             total += 1
-                            cc[index_word][docname]["forms"].add(token)
+                            cc[index_word][docname]["forms"].append(token)
 
                         else:
-                            cc[index_word][docname] = {"occurrences": 1, "forms": set()}
+                            cc[index_word][docname] = {"occurrences": 1, "forms": []}
                             total += 1
-                            cc[index_word][docname]["forms"].add(token)
+                            cc[index_word][docname]["forms"].append(token)
 
                     else:
                         cc[index_word] = {}
-                        cc[index_word][docname] = {"occurrences": 1, "forms": set()}
+                        cc[index_word][docname] = {"occurrences": 1, "forms": []}
                         total += 1
-                        cc[index_word][docname]["forms"].add(token)
+                        cc[index_word][docname]["forms"].append(token)
 
 
 def plain_underscore(x):
@@ -121,71 +121,93 @@ def plain_underscore(x):
     return plain_s
 
 
-myKeys = list(cc.keys())
-myKeys.sort(key=lambda x: plain_underscore(x))
-sorted_cc = {i: cc[i] for i in myKeys}
-
-html = f"""
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-  <link rel="stylesheet" href="styles.css" />
+def sort_by_freq(x):
+    oc = 0
+    for k, v in x[1].items():
+        oc += v["occurrences"]
+    return oc
 
 
+for i in [0, 1]:
+    if i == 0:
+        filename = "index.html"
+        links = '<h2 id="sort"><a href="/" class="active">Sort alphabetically</a> <a href="/sorted.html">Sort by frequency</a></h2>'
+        myKeys = list(cc.keys())
+        myKeys.sort(
+            key=lambda x: plain_underscore(x),
+        )
+        sorted_cc = {i: cc[i] for i in myKeys}
 
-    <meta charset="utf-8" />
-    <title>GEMF Concordance</title>
+    elif i == 1:
+        filename = "sorted.html"
+        links = '<h2 id="sort"><a href="/">Sort alphabetically</a> <a  class="active" href="/sorted.html">Sort by frequency</a></h2>'
+
+        sorted_cc = {
+            k: v for k, v in sorted(cc.items(), key=sort_by_freq, reverse=True)
+        }
+
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
     <link rel="stylesheet" href="styles.css" />
-    <script src="app.js"></script>
-  </head>
-  <body>
-  <h1>GEMF Concordance</h1>
-  <input id="filter" type="text" placeholder="Search"></input>
-  <h5 id="total"><span>{total}</span> tokens</h5>
-  """
-alphakey = ""
 
-for key, val in sorted_cc.items():
+
+
+        <meta charset="utf-8" />
+        <title>GEMF Concordance</title>
+        <link rel="stylesheet" href="styles.css" />
+        <script src="app.js"></script>
+    </head>
+    <body>
+    <h1 style="text-align:center">GEMF Concordance</h1>
+    {links}
+    <input id="filter" type="text" placeholder="Search"></input>
+    <h5 id="total"><span>{total}</span> tokens</h5>
     """
-    if key[0] != alphakey:
-        print(alphakey)
-        alphakey = key[0]
-        html += f"\n<h1>{alphakey}</h1>\n"
+    alphakey = ""
+
+    for key, val in sorted_cc.items():
+        """
+        if key[0] != alphakey:
+            print(alphakey)
+            alphakey = key[0]
+            html += f"\n<h1>{alphakey}</h1>\n"
+        """
+        num = 0
+        # forms = set()
+        for docval in val.values():
+            num += docval["occurrences"]
+        """
+        for docval in val.values():
+            for f in docval["forms"]:
+                forms.add(f)
+        """
+        # html += f"<h2>{key} ({num}) <span class='forms'>{', '.join(forms)}</span></h2>\n"
+        plain_key = ""
+
+        for s in unicodedata.normalize("NFD", key):
+            if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς":
+                plain_key += s
+        html += f"<div data-val='{plain_key}'>"
+        html += f"<h2>{key} <span class='num'>{num}</span></h2>\n"
+
+        myKeys = list(val.keys())
+        myKeys.sort(key=lambda x: plain_underscore(x))
+        sorted_val = {i: val[i] for i in myKeys}
+
+        for doc, docval in sorted_val.items():
+            forms = ", ".join(docval["forms"])
+            html += f"<h3>{doc}: <span class='forms-2'>{forms}</span></h3>\n"
+        html += f"</div>"
+
+    html += f"""
+    </body>
+    <script>
+        window.total = {total}
+    </script>
+    <script src="scripts.js"></script>
+    </html>
     """
-    num = 0
-    # forms = set()
-    for docval in val.values():
-        num += docval["occurrences"]
-    """
-    for docval in val.values():
-        for f in docval["forms"]:
-            forms.add(f)
-    """
-    # html += f"<h2>{key} ({num}) <span class='forms'>{', '.join(forms)}</span></h2>\n"
-    plain_key = ""
-
-    for s in unicodedata.normalize("NFD", key):
-        if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς":
-            plain_key += s
-    html += f"<div data-val='{plain_key}'>"
-    html += f"<h2>{key} <span class='num'>{num}</span></h2>\n"
-
-    myKeys = list(val.keys())
-    myKeys.sort(key=lambda x: plain_underscore(x))
-    sorted_val = {i: val[i] for i in myKeys}
-
-    for doc, docval in sorted_val.items():
-        forms = ", ".join(docval["forms"])
-        html += f"<h3>{doc}: <span class='forms-2'>{forms}</span></h3>\n"
-    html += f"</div>"
-
-html += f"""
-  </body>
-  <script>
-    window.total = {total}
-  </script>
-  <script src="scripts.js"></script>
-</html>
-"""
-with open("index.html", "w") as f:
-    f.write(html)
+    with open(filename, "w") as f:
+        f.write(html)
