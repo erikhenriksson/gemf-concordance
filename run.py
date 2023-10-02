@@ -180,6 +180,7 @@ for i in [0, 1]:
 
 
         <meta charset="utf-8" />
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>GEMF Greek Concordance</title>
         <link rel="stylesheet" href="styles.css" />
         <script src="app.js"></script>
