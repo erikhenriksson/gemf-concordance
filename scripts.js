@@ -70,7 +70,10 @@ const search = (e) => {
   document.querySelector("#total span").innerHTML = total;
 };
 
-document.querySelector("#filter").addEventListener("keyup", (e) => {
+document.querySelector("#filter").addEventListener("input", (e) => {
   e.target.value = transliterate(e.target.value);
+});
+
+document.querySelector("#filter").addEventListener("keyup", (e) => {
   debounce(search)(e);
 });
