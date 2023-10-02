@@ -56,18 +56,50 @@ for doc in re.split(r"(\[G.*)", data):
         doc = doc.replace("[]", "_")
         doc = doc.replace("[", "").replace("]", "")
 
+        doc = re.sub(r"\_{1,}", r"_", doc)
+
+        doc = unicodedata.normalize("NFC", doc)
+
+        doc = re.sub("\_([ἑἐἀὀἔὁἅἱὁ])", r"_ \1", doc)
+        doc = re.sub("\_(αὐ)", r"_ \1", doc)
+        doc = re.sub("([ῖ])\_", r"\1 _", doc)
+        doc = doc.replace("τοῖσ_λ̣αβ", "τοῖσ_ λ̣αβ")
+        doc = doc.replace("τ̣όν_κάπ̣", "τ̣όν _κάπ̣")
+        doc = doc.replace("λλο_τοῦτ", "λλο_ τοῦτ")
+        doc = doc.replace("ὧρ̣οσ_κεκ̣λεισ", "ὧρ̣οσ_ κεκ̣λεισ")
+        doc = doc.replace("ὧν_νχρω", "ὧν _νχρω")
+        doc = doc.replace("χ_μ̣ε̣τ̣ά̣", "χ_ μ̣ε̣τ̣ά̣")
+        doc = doc.replace("είψασ_πιπέρε", "είψασ_ πιπέρε")
+        doc = doc.replace("σου_καί", "σου_ καί")
+        doc = doc.replace("ἴδ̣η̣_ἴδη", "ἴδ̣η̣_ ἴδη")
+        doc = doc.replace("ζοῆσ̣_μου", "ζοῆσ̣_ μου")
+        doc = doc.replace("εσχομ_νῦν", "εσχομ_ νῦν")
+        doc = doc.replace("ἐπίβαλε_β̣ραχύ", "ἐπίβαλε_ β̣ραχύ")
+        doc = doc.replace("δαίμονοσ_αστρι", "δαίμονοσ _αστρι")
+        doc = doc.replace("βαλλο_τοῦτο", "βαλλο_ τοῦτο")
+        doc = doc.replace(
+            " α̅υ̅τ̅_κ̅ι̅ν̅ο̅θ̅ε̅ν̅χ̅υ̅χ̅", " α̅υ̅τ̅_ κ̅ι̅ν̅ο̅θ̅ε̅ν̅χ̅υ̅χ̅"
+        )
+        doc = doc.replace(
+            "προσφιλήσ_αχον_χαλκῶι_πλως ", "προσφιλήσ_ αχον_ χαλκῶι _πλως"
+        )
+        doc = doc.replace("πν̣_λύχνος", " πν̣_ λύχνος")
+        doc = doc.replace("αὐτοῖσ_λαβων_ν", "αὐτοῖσ _λαβων_ν")
+
+        doc = re.sub(r"\s+", " ", doc)
+
         print(doc)
+
         for word in doc.split():
             res_word = ""
             for s in word:
                 if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ":
                     res_word += s
             if res_word:
-                word = re.sub(r"\_{1,}", r"_", word)
-
-                # if re.search("([α-ωΑ-Ω]|[ϲ])+", word):
+                word = unicodedata.normalize("NFD", word)
                 token = word
                 index_word = ""
+
                 for d in word:
                     if (
                         d.isspace()
@@ -78,13 +110,6 @@ for doc in re.split(r"(\[G.*)", data):
                             index_word += d
 
                 index_word = re.sub(r"\_{1,}", r"_", index_word)
-                """
-                index_word = re.sub(
-                    "[^ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ\_]",
-                    "",
-                    word,
-                )
-                """
 
                 token = re.sub("σ$", "ς", token)
                 index_word = re.sub("σ$", "ς", index_word)
