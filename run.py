@@ -115,7 +115,7 @@ def plain_underscore(x):
     plain_s = ""
 
     for s in unicodedata.normalize("NFD", x):
-        if s in "_ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς":
+        if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς":
             plain_s += s
 
     return plain_s
