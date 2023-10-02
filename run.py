@@ -155,12 +155,12 @@ for i in [0, 1]:
 
 
         <meta charset="utf-8" />
-        <title>GEMF Concordance</title>
+        <title>GEMF Greek Concordance</title>
         <link rel="stylesheet" href="styles.css" />
         <script src="app.js"></script>
     </head>
     <body>
-    <h1 style="text-align:center">GEMF Concordance</h1>
+    <h1 style="text-align:center">GEMF Greek Concordance</h1>
     {links}
     <input id="filter" type="text" placeholder="Search"></input>
     <h5 id="total"><span>{total}</span> tokens</h5>
