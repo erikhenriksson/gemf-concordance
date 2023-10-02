@@ -156,7 +156,7 @@ def sort_by_freq(x):
 for i in [0, 1]:
     if i == 0:
         filename = "index.html"
-        links = '<h2 id="sort"><a href="/" class="active">Sort alphabetically</a> <a href="/sorted.html">Sort by frequency</a></h2>'
+        links = '<h2 id="sort"><a href="/gemf" class="active">Sort alphabetically</a> <a href="/gemf/sorted.html">Sort by frequency</a></h2>'
         myKeys = list(cc.keys())
         myKeys.sort(
             key=lambda x: plain_underscore(x),
@@ -165,7 +165,7 @@ for i in [0, 1]:
 
     elif i == 1:
         filename = "sorted.html"
-        links = '<h2 id="sort"><a href="/">Sort alphabetically</a> <a  class="active" href="/sorted.html">Sort by frequency</a></h2>'
+        links = '<h2 id="sort"><a href="/gemf">Sort alphabetically</a> <a  class="active" href="/gemf/sorted.html">Sort by frequency</a></h2>'
 
         sorted_cc = {
             k: v for k, v in sorted(cc.items(), key=sort_by_freq, reverse=True)
