@@ -1,5 +1,9 @@
 import re
 import unicodedata
+import csv
+
+csv_header = ["doc", "words"]
+csv_data = {}
 
 grave_to_acute = lambda x: unicodedata.normalize(
     "NFC",
@@ -12,7 +16,7 @@ with open("GEMF.txt") as f:
     data = f.read()
 
 filename = ""
-
+docname = ""
 cc = {}
 total = 0
 
@@ -88,8 +92,12 @@ for doc in re.split(r"(\[G.*)", data):
 
         doc = re.sub(r"\s+", " ", doc)
 
-        print(doc)
+        if not docname:
+            continue
 
+        print(doc)
+        print(docname)
+        csv_data[docname] = []
         for word in doc.split():
             res_word = ""
             for s in word:
@@ -118,6 +126,7 @@ for doc in re.split(r"(\[G.*)", data):
                 index_word = unicodedata.normalize("NFC", index_word)
 
                 if len(index_word.replace("_", "")) > 2:
+                    csv_data[docname].append(index_word)
                     if index_word in cc:
                         if docname in cc[index_word]:
                             cc[index_word][docname]["occurrences"] += 1
@@ -134,6 +143,21 @@ for doc in re.split(r"(\[G.*)", data):
                         cc[index_word][docname] = {"occurrences": 1, "forms": []}
                         total += 1
                         cc[index_word][docname]["forms"].append(token)
+
+        if not csv_data[docname]:
+            csv_data.pop(docname)
+        else:
+            csv_data[docname] = " ".join(csv_data[docname])
+
+with open("doc_words.csv", "w", encoding="UTF8") as f:
+    writer = csv.writer(f)
+
+    # write the header
+    writer.writerow(csv_header)
+
+    # write the data
+    for csv_d in list(csv_data.items()):
+        writer.writerow(csv_d)
 
 
 def plain_underscore(x):
