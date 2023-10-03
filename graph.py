@@ -129,7 +129,7 @@ nx.draw_networkx_labels(G, pos, font_size=9, font_family="arial")
 
 edge_width = [d["weight"] * 10 for (u, v, d) in G.edges(data=True)]
 nx.draw_networkx_edges(G, pos, alpha=0.1, edge_color="darkred", width=edge_width)
-plt.savefig("graph.png", dpi=300)
+plt.savefig("graph.jpg", dpi=300)
 
 plt.axis("off")
 # plt.show()
