@@ -200,10 +200,8 @@ for i in [0, 1]:
     <html lang="en">
     <head>
     <link rel="stylesheet" href="styles.css" />
-
-
-
         <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=0.5" />
         <title>GEMF Greek Concordance</title>
         <link rel="stylesheet" href="styles.css" />
         <script src="app.js"></script>
