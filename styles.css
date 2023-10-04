@@ -5,8 +5,19 @@ body {
   font-size: 0.7em;
   color: black;
   text-align: left;
-  width: 600px;
   margin: 20px auto;
+}
+
+@media (min-width: 601px) {
+  body {
+    width: 600px;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    width: 100%;
+  }
 }
 
 #sort {
