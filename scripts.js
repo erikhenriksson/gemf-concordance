@@ -1,4 +1,5 @@
 const transliteration = {
+  q: "",
   w: "ς",
   e: "ε",
   r: "ρ",
@@ -8,6 +9,7 @@ const transliteration = {
   i: "ι",
   o: "ο",
   p: "π",
+  å: "",
   a: "α",
   s: "σ",
   d: "δ",
@@ -17,6 +19,8 @@ const transliteration = {
   j: "ξ",
   k: "κ",
   l: "λ",
+  ö: "",
+  ä: "",
   z: "ζ",
   x: "χ",
   c: "ψ",
