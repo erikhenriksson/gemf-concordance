@@ -1,5 +1,4 @@
 const transliteration = {
-  q: "",
   w: "ς",
   e: "ε",
   r: "ρ",
@@ -9,7 +8,6 @@ const transliteration = {
   i: "ι",
   o: "ο",
   p: "π",
-  å: "",
   a: "α",
   s: "σ",
   d: "δ",
@@ -19,8 +17,6 @@ const transliteration = {
   j: "ξ",
   k: "κ",
   l: "λ",
-  ö: "",
-  ä: "",
   z: "ζ",
   x: "χ",
   c: "ψ",
@@ -33,6 +29,9 @@ const transliteration = {
 const transliterate = (string) => {
   var result = "";
   for (chr of string) {
+    if (["q", "å", "ö", "ä"].includes(chr)) {
+      return "";
+    }
     result += transliteration[chr] || chr;
   }
   return result;
