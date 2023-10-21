@@ -29,6 +29,7 @@ const transliteration = {
 const transliterate = (string) => {
   var result = "";
   for (chr of string) {
+    chr = chr.toLowerCase();
     if (["q", "å", "ö", "ä"].includes(chr)) {
       return "";
     }

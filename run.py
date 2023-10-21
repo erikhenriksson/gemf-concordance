@@ -2,9 +2,11 @@ import re
 import unicodedata
 import csv
 
+# Csv config
 csv_header = ["doc", "words"]
 csv_data = {}
 
+# Convert grave to acute
 grave_to_acute = lambda x: unicodedata.normalize(
     "NFC",
     unicodedata.normalize("NFD", x or "").translate(
@@ -12,29 +14,41 @@ grave_to_acute = lambda x: unicodedata.normalize(
     ),
 )
 
+# Get data
 with open("GEMF.txt") as f:
-    data = f.read()
+    gemf_data = f.read()
+
+with open("SUPPLorig.txt") as f:
+    suppl_data = f.read()
+
+# Combine data
+data = gemf_data + suppl_data
 
 filename = ""
 docname = ""
+
+# Concordance dict
 cc = {}
 total = 0
 
-for doc in re.split(r"(\[G.*)", data):
-    if doc.startswith("[G"):
+for doc in re.split(r"(\[(G|S).*)", data):
+    # Get doc name
+    if doc.startswith("[G") or doc.startswith("[S"):
         docname = doc[1:-1]
 
     else:
+        # No acutes
         doc = grave_to_acute(doc)
+
+        # Cleaning
         doc = doc.replace("̶", "_")
-        # doc = doc.replace("̧", "_")
+        doc = unicodedata.normalize("NFC", doc)
         doc = unicodedata.normalize("NFD", doc)
+
         doc = list(doc)
         for i, k in enumerate(doc):
-            # print(k)
-            # print(ord(k))
             if k.isupper():
-                doc[i] = " " + k  # add space before caps
+                doc[i] = " " + k  # Force space before caps
 
             if ord(k) == 837:
                 doc[i] = "ι"
@@ -45,16 +59,20 @@ for doc in re.split(r"(\[G.*)", data):
         doc = "".join(doc).lower()
 
         filt_doc = ""
+
+        # Filtering: only alphabets, _ and []
         for d in doc:
             if (
                 d.isspace()
                 or unicodedata.combining(d)
-                or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ_][ ̣"
+                # or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ_][ ̣"
+                or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ_]["
             ):
                 filt_doc += d
 
         doc = filt_doc
 
+        # More cleaning
         doc = re.sub(r"\s+", " ", doc)
         doc = doc.replace("ϲ", "σ")
         doc = doc.replace("[]", "_")
@@ -105,8 +123,9 @@ for doc in re.split(r"(\[G.*)", data):
                     res_word += s
             if res_word:
                 word = unicodedata.normalize("NFD", word)
-                token = word
+                # token = word
                 index_word = ""
+                token = ""
 
                 for d in word:
                     if (
@@ -116,6 +135,10 @@ for doc in re.split(r"(\[G.*)", data):
                     ):
                         if d not in " ̣ ̅":
                             index_word += d
+
+                for d in word:
+                    if d not in " ̣ ̅":
+                        token += d
 
                 index_word = re.sub(r"\_{1,}", r"_", index_word)
 
@@ -148,6 +171,11 @@ for doc in re.split(r"(\[G.*)", data):
             csv_data.pop(docname)
         else:
             csv_data[docname] = " ".join(csv_data[docname])
+
+
+# DONE COLLECTING DATA
+
+# Now, we save data in CSV
 
 with open("doc_words.csv", "w", encoding="UTF8") as f:
     writer = csv.writer(f)
@@ -202,12 +230,13 @@ for i in [0, 1]:
     <link rel="stylesheet" href="styles.css" />
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=0.5" />
-        <title>GEMF Greek Concordance</title>
+        <title>GEMF & SM Greek Index</title>
         <link rel="stylesheet" href="styles.css" />
         <script src="app.js"></script>
     </head>
     <body>
-    <h1 style="text-align:center">GEMF Greek Concordance</h1>
+    <h1 style="text-align:center">GEMF & SM Greek Index</h1>
+    <div class="blurb"><p>All words (3 or more characters) from the <strong>Greek and Egyptian Magical Formularies</strong> (2022) and the <strong>Supplementum Magicum</strong> (1990-1992).</p></div>
     {links}
     <input id="filter" type="text" placeholder="Search"></input>
     <h5 id="total"><span>{total}</span> tokens</h5>

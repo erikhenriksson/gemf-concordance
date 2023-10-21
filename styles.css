@@ -23,6 +23,18 @@ body {
   }
 }
 
+.blurb {
+  font-size: 13px;
+  color: darkcyan;
+  width: 310px;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+  margin: 20px auto 40px;
+  text-align: center;
+  border-radius: 14px;
+  background: aliceblue;
+}
+
 #sort {
   margin: -14px 0 30px;
   font-size: 14px;
@@ -47,7 +59,7 @@ body {
   border: 1px solid silver;
   border-radius: 10px;
   font-size: 16px;
-  color: darkslategrey;
+  color: darkcyan;
   padding: 10px;
   text-align: center;
 }
@@ -55,7 +67,7 @@ body {
 h1 {
   text-align: center;
   font-size: 30px;
-  margin: 40px 0;
+  margin: 40px 0 0;
 }
 
 .hidden {
