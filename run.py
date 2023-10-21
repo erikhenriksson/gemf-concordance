@@ -236,7 +236,7 @@ for i in [0, 1]:
     </head>
     <body>
     <h1 style="text-align:center">GEMF & SM Greek Index</h1>
-    <div class="blurb"><p>All words (3 or more characters) from the <strong>Greek and Egyptian Magical Formularies</strong> (2022) and the <strong>Supplementum Magicum</strong> (1990-1992).</p></div>
+    <section class="blurb"><p>All words (3 or more characters) from the <strong>Greek and Egyptian Magical Formularies</strong> (2022) and the <strong>Supplementum Magicum</strong> (1990-1992).</p></section>
     {links}
     <input id="filter" type="text" placeholder="Search"></input>
     <h5 id="total"><span>{total}</span> tokens</h5>
