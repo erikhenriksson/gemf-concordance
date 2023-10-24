@@ -1,6 +1,7 @@
 import re
 import unicodedata
 import csv
+import json
 
 # Csv config
 csv_header = ["doc", "words"]
@@ -21,8 +22,11 @@ with open("GEMF.txt") as f:
 with open("SUPPLorig.txt") as f:
     suppl_data = f.read()
 
+with open("PGM.txt") as f:
+    pgm_data = f.read()
+
 # Combine data
-data = gemf_data + suppl_data
+data = pgm_data + suppl_data + gemf_data
 
 filename = ""
 docname = ""
@@ -30,10 +34,12 @@ docname = ""
 # Concordance dict
 cc = {}
 total = 0
+word_id = 1
+words = [""]
 
-for doc in re.split(r"(\[(G|S).*)", data):
+for doc in re.split(r"(\[(G|S|P).*)", data):
     # Get doc name
-    if doc.startswith("[G") or doc.startswith("[S"):
+    if doc.startswith("[G") or doc.startswith("[S") or doc.startswith("[P"):
         docname = doc[1:-1]
 
     else:
@@ -65,8 +71,8 @@ for doc in re.split(r"(\[(G|S).*)", data):
             if (
                 d.isspace()
                 or unicodedata.combining(d)
-                # or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ_][ ̣"
-                or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ_]["
+                or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς_][ ̣"
+                # or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ_]["
             ):
                 filt_doc += d
 
@@ -82,8 +88,16 @@ for doc in re.split(r"(\[(G|S).*)", data):
 
         doc = unicodedata.normalize("NFC", doc)
 
-        doc = re.sub("\_([ἑἐἀὀἔὁἅἱὁ])", r"_ \1", doc)
-        doc = re.sub("\_(αὐ)", r"_ \1", doc)
+        doc = re.sub(
+            "\_([ἀἐἠἰὀὐὠᾀᾐᾠῤἄἔἤἴὄὔὤᾄᾔᾤἂἒἢἲὂὒὢᾂᾒᾢἆἦἶὖὦᾆᾖᾦἁἑἡἱὁὑὡᾁᾑᾡῥἅἕἥἵὅὕὥᾅᾕᾥἃἓἣἳὃὓὣᾃᾓᾣἇἧἷὗὧᾇᾗᾧἈἘἨἸὈὨᾈᾘᾨἌἜἬἼὌὬᾌᾜᾬἊἚἪἺὊὪᾊᾚᾪἎἮἾὮᾎᾞᾮἉἙἩἹὉὙὩᾉᾙᾩῬἍἝἭἽὍὝὭᾍᾝᾭἋἛἫἻὋὛὫᾋᾛᾫἏἯἿὟὯᾏᾟᾯ])",
+            r"_ \1",
+            doc,
+        )
+        doc = re.sub(
+            "\_(αἰ|αἱ|εἰ|εἱ|οἰ|οἱ|υἰ|υἱ|αὔ|αὕ|εὔ|εὕ|οὔ|οὕ|αὐ|αὑ|εὐ|εὑ|ᾁ|ᾡ|ᾑ)",
+            r"_ \1",
+            doc,
+        )
         doc = re.sub("([ῖ])\_", r"\1 _", doc)
         doc = doc.replace("τοῖσ_λ̣αβ", "τοῖσ_ λ̣αβ")
         doc = doc.replace("τ̣όν_κάπ̣", "τ̣όν _κάπ̣")
@@ -110,6 +124,10 @@ for doc in re.split(r"(\[(G|S).*)", data):
 
         doc = re.sub(r"\s+", " ", doc)
 
+        doc = unicodedata.normalize("NFD", doc)
+        doc = doc.replace(" ̣", "")
+        doc = unicodedata.normalize("NFC", doc)
+
         if not docname:
             continue
 
@@ -119,7 +137,7 @@ for doc in re.split(r"(\[(G|S).*)", data):
         for word in doc.split():
             res_word = ""
             for s in word:
-                if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ":
+                if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς":
                     res_word += s
             if res_word:
                 word = unicodedata.normalize("NFD", word)
@@ -130,8 +148,8 @@ for doc in re.split(r"(\[(G|S).*)", data):
                 for d in word:
                     if (
                         d.isspace()
-                        or unicodedata.combining(d)
-                        or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµ_"
+                        # or unicodedata.combining(d)
+                        or d in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς_"
                     ):
                         if d not in " ̣ ̅":
                             index_word += d
@@ -154,28 +172,43 @@ for doc in re.split(r"(\[(G|S).*)", data):
                         if docname in cc[index_word]:
                             cc[index_word][docname]["occurrences"] += 1
                             total += 1
-                            cc[index_word][docname]["forms"].append(token)
+                            cc[index_word][docname]["forms"].append([token, word_id])
 
                         else:
                             cc[index_word][docname] = {"occurrences": 1, "forms": []}
                             total += 1
-                            cc[index_word][docname]["forms"].append(token)
+                            cc[index_word][docname]["forms"].append([token, word_id])
 
                     else:
                         cc[index_word] = {}
                         cc[index_word][docname] = {"occurrences": 1, "forms": []}
                         total += 1
-                        cc[index_word][docname]["forms"].append(token)
+                        cc[index_word][docname]["forms"].append([token, word_id])
+                    words.append(token)
+                    word_id += 1
+
+                elif len(index_word.replace("_", "")) > 0:
+                    words.append(token)
+                    word_id += 1
 
         if not csv_data[docname]:
             csv_data.pop(docname)
         else:
             csv_data[docname] = " ".join(csv_data[docname])
+            words.append("")
+            word_id += 1
 
 
 # DONE COLLECTING DATA
 
 # Now, we save data in CSV
+
+words += ""
+
+print(words)
+
+with open("data.js", "w") as f:
+    f.write(f"data = {json.dumps(words, ensure_ascii=False)}")
 
 with open("doc_words.csv", "w", encoding="UTF8") as f:
     writer = csv.writer(f)
@@ -192,7 +225,7 @@ def plain_underscore(x):
     plain_s = ""
 
     for s in unicodedata.normalize("NFD", x):
-        if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς":
+        if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµςς":
             plain_s += s
 
     return plain_s
@@ -208,7 +241,7 @@ def sort_by_freq(x):
 for i in [0, 1]:
     if i == 0:
         filename = "index.html"
-        links = '<h2 id="sort"><a href="/gemf" class="active">Sort alphabetically</a> <a href="/gemf/sorted.html">Sort by frequency</a> <a href="/gemf/graph.html">Co-occurrence network</a></h2>'
+        links = '<h2 id="sort"><a href="/magic" class="active">Sort alphabetically</a> <a href="/magic/sorted.html">Sort by frequency</a> <a href="/magic/graph.html">Co-occurrence network</a></h2>'
         myKeys = list(cc.keys())
         myKeys.sort(
             key=lambda x: plain_underscore(x),
@@ -217,7 +250,7 @@ for i in [0, 1]:
 
     elif i == 1:
         filename = "sorted.html"
-        links = '<h2 id="sort"><a href="/gemf">Sort alphabetically</a> <a  class="active" href="/gemf/sorted.html">Sort by frequency</a> <a href="/gemf/graph.html">Co-occurrence network</a></h2>'
+        links = '<h2 id="sort"><a href="/magic">Sort alphabetically</a> <a  class="active" href="/magic/sorted.html">Sort by frequency</a> <a href="/magic/graph.html">Co-occurrence network</a></h2>'
 
         sorted_cc = {
             k: v for k, v in sorted(cc.items(), key=sort_by_freq, reverse=True)
@@ -230,16 +263,16 @@ for i in [0, 1]:
     <link rel="stylesheet" href="styles.css" />
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=0.5" />
-        <title>GEMF & SM Greek Index</title>
+        <title>Index of Greek Magic</title>
         <link rel="stylesheet" href="styles.css" />
-        <script src="app.js"></script>
+        <script src="data.js"></script>
     </head>
     <body>
-    <h1 style="text-align:center">GEMF & SM Greek Index</h1>
-    <section class="blurb"><p>All words (3 or more characters) from the <strong>Greek and Egyptian Magical Formularies</strong> (2022) and the <strong>Supplementum Magicum</strong> (1990-1992).</p></section>
+    <h1 style="text-align:center">Magical Papyri Greek Index</h1>
+    <section class="blurb"><p>All Greek words (3 or more characters) from the <strong>Papyri Graecae Magicae (PGM)</strong> (1974), <strong>Supplementum Magicum (SM)</strong> (1990-1992), and the <strong>Greek and Egyptian Magical Formularies (GEMF)</strong> (2022). <br><br>Only GEMF words are included where it has superseded older editions.</p></section>
     {links}
     <input id="filter" type="text" placeholder="Search"></input>
-    <h5 id="total"><span>{total}</span> tokens</h5>
+    <h5 id="total"><span>{total}</span> words</h5>
     """
     alphakey = ""
 
@@ -263,7 +296,7 @@ for i in [0, 1]:
         plain_key = ""
 
         for s in unicodedata.normalize("NFD", key):
-            if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµς":
+            if s in "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωαϲμµςς":
                 plain_key += s
         html += f"<div data-val='{plain_key}'>"
         html += f"<h2>{key} <span class='num'>{num}</span></h2>\n"
@@ -273,11 +306,14 @@ for i in [0, 1]:
         sorted_val = {i: val[i] for i in myKeys}
 
         for doc, docval in sorted_val.items():
-            forms = ", ".join(docval["forms"])
+            forms = ", ".join(
+                [f"<span data-id='{x[1]}'>{x[0]}</span>" for x in docval["forms"]]
+            )
             html += f"<h3>{doc}: <span class='forms-2'>{forms}</span></h3>\n"
         html += f"</div>"
 
     html += f"""
+    <section id="popup"></section>
     </body>
     <script>
         window.total = {total}

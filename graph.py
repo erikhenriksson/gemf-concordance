@@ -51,7 +51,7 @@ tmp.sort_values(by="cnt", ascending=False).plot(
 
 
 vocab = {}
-target_words = word_cnt_df[word_cnt_df["cnt"] > 2]["word"].values
+target_words = word_cnt_df[word_cnt_df["cnt"] > 5]["word"].values
 for word in target_words:
     if word not in vocab:
         vocab[word] = len(vocab)

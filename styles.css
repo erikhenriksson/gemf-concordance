@@ -26,7 +26,7 @@ body {
 .blurb {
   font-size: 13px;
   color: darkcyan;
-  width: 310px;
+  width: 430px;
   padding: 0 10px;
   border: 1px solid #ccc;
   margin: 20px auto 40px;
@@ -104,4 +104,19 @@ h5 {
   color: darkslategrey;
   font-weight: 400;
   font-size: 13px;
+}
+
+#popup {
+  position: absolute;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: white;
+  padding: 5px;
+  height: 20px;
+  display: none;
+}
+
+.forms-2 span {
+  cursor: pointer;
 }

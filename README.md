@@ -1,1 +1,1 @@
-# gemf-concordance
+# An Index of Greek Magic
